@@ -1,6 +1,7 @@
-import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
-import Notiflix from "notiflix";
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import Notiflix from 'notiflix';
+
 
 const options = {
   enableTime: true,
@@ -9,8 +10,8 @@ const options = {
   minuteIncrement: 1,
     onClose(selectedDates) {
       const selectedDateUnix = selectedDates[0].getTime();
-    let id = null;
-
+    
+    
     if (Date.now() > selectedDateUnix) {
       Notiflix.Notify.failure('Please choose a date in the future');
 
@@ -27,15 +28,23 @@ const inputDataEl = document.querySelector('#datetime-picker');
 flatpickr(inputDataEl, options);
 const buttonStartTimer = document.querySelector('button[data-start]');
 buttonStartTimer.addEventListener('click', () => {
-    const timer = {
+  buttonStartTimer.disabled = true;
+  inputDataEl.disabled = true;
+   const timer = {      
   timerDeadline: new Date(inputDataEl.value),
   intervalId: null,
   rootSelector: document.querySelector('.timer'),
+  dataDays: document.querySelector('.value[data-days]'),
+  dataHours: document.querySelector('.value[data-hours]'),
+  dataMinutes: document.querySelector('.value[data-minutes]'),
+  dataSeconds: document.querySelector('.value[data-seconds]'),
 
-  start() {
+
+  start() {  
+    clearTimeout(this.intervalId);
     this.intervalId = setInterval(() => {
       const ms = this.timerDeadline - Date.now();
-
+      
       if (ms <= 0) {
         this.stop();
 
@@ -44,18 +53,17 @@ buttonStartTimer.addEventListener('click', () => {
 
       const { days, hours, minutes, seconds } = this.convertMs(ms);
 
-      this.rootSelector.querySelector('.js-timer__days').textContent = this.addLeadingZero(days);
-      this.rootSelector.querySelector('.js-timer__hours').textContent = this.addLeadingZero(hours);
-      this.rootSelector.querySelector('.js-timer__minutes').textContent = this.addLeadingZero(minutes);
-      this.rootSelector.querySelector('.js-timer__seconds').textContent = this.addLeadingZero(seconds);
-
+      this.dataDays.textContent = this.addLeadingZero(days);
+      this.dataHours.textContent = this.addLeadingZero(hours);
+      this.dataMinutes.textContent = this.addLeadingZero(minutes);
+      this.dataSeconds.textContent = this.addLeadingZero(seconds);
     }, 1000);
   },
 
   stop() {
     clearInterval(this.intervalId);
   },
-
+   
 convertMs(ms) {
   const second = 1000;
   const minute = second * 60;
