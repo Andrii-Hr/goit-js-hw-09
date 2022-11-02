@@ -2,6 +2,10 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import Notiflix from 'notiflix';
 
+const buttonStartTimer = document.querySelector('button[data-start]');
+buttonStartTimer.disabled = true;
+
+
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -24,7 +28,7 @@ const options = {
 
 const inputDataEl = document.querySelector('#datetime-picker');
 flatpickr(inputDataEl, options);
-const buttonStartTimer = document.querySelector('button[data-start]');
+
 buttonStartTimer.addEventListener('click', () => {
   buttonStartTimer.disabled = true;
   inputDataEl.disabled = true;
@@ -36,48 +40,50 @@ buttonStartTimer.addEventListener('click', () => {
     dataHours: document.querySelector('.value[data-hours]'),
     dataMinutes: document.querySelector('.value[data-minutes]'),
     dataSeconds: document.querySelector('.value[data-seconds]'),
+    meta() {
+      const ms = this.timerDeadline - Date.now();
+      if (ms <= 0) {
+        this.stop();
 
+        return;
+      }
+
+      const { days, hours, minutes, seconds } = convertMs(ms);
+
+      this.dataDays.textContent = addLeadingZero(days);
+      this.dataHours.textContent = addLeadingZero(hours);
+      this.dataMinutes.textContent = addLeadingZero(minutes);
+      this.dataSeconds.textContent = addLeadingZero(seconds);
+    },
     start() {
+      this.meta();
       clearTimeout(this.intervalId);
-      this.intervalId = setInterval(() => {
-        const ms = this.timerDeadline - Date.now();
-
-        if (ms <= 0) {
-          this.stop();
-
-          return;
-        }
-
-        const { days, hours, minutes, seconds } = this.convertMs(ms);
-
-        this.dataDays.textContent = this.addLeadingZero(days);
-        this.dataHours.textContent = this.addLeadingZero(hours);
-        this.dataMinutes.textContent = this.addLeadingZero(minutes);
-        this.dataSeconds.textContent = this.addLeadingZero(seconds);
+      this.intervalId = setInterval(() => {this.meta();
+        
       }, 1000);
     },
 
     stop() {
       clearInterval(this.intervalId);
     },
-
-    convertMs(ms) {
-      const second = 1000;
-      const minute = second * 60;
-      const hour = minute * 60;
-      const day = hour * 24;
-
-      const days = Math.floor(ms / day);
-      const hours = Math.floor((ms % day) / hour);
-      const minutes = Math.floor(((ms % day) % hour) / minute);
-      const seconds = Math.floor((((ms % day) % hour) % minute) / second);
-
-      return { days, hours, minutes, seconds };
-    },
-
-    addLeadingZero(value) {
-      return String(value).padStart(2, 0);
-    },
   };
   timer.start();
 });
+
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  const days = Math.floor(ms / day);
+  const hours = Math.floor((ms % day) / hour);
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+
+  return { days, hours, minutes, seconds };
+}
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, 0);
+}
